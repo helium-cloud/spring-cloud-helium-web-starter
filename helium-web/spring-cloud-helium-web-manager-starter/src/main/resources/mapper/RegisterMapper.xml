@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coral.mini.program.rcs.cff.data.consumer.db.mapper.RegisterMapper">
+
+    <resultMap id="RegisterEntityMap" type="com.coral.mini.program.rcs.cff.data.consumer.entity.RegisterEntity">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="call_id" property="callId"/>
+        <result column="path_key_id" property="pathKeyId"/>
+        <result column="client_enum" property="clientEnum"/>
+        <result column="contact_url" property="contactUrl"/>
+        <result column="instance_param" property="instanceParam"/>
+        <result column="nonce_count" property="nonceCount"/>
+        <result column="pui" property="pui"/>
+        <result column="pvi" property="pvi"/>
+        <result column="scheme" property="scheme"/>
+        <result column="ue_ip" property="ueIp"/>
+        <result column="register_user" property="registerUser"/>
+        <result column="auth" property="auth"/>
+        <result column="first_time" property="firstTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="RegisterDetailMap" type="com.coral.mini.program.rcs.cff.data.consumer.entity.RegisterDetail">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="call_id" property="callId"/>
+        <result column="path_key_id" property="pathKeyId"/>
+        <result column="step_type" property="stepType"/>
+        <result column="step_number" property="stepNumber"/>
+        <result column="response" property="response"/>
+        <result column="register_time" property="registerTime"/>
+
+    </resultMap>
+
+    <select id="queryRegisterIdByCallId" parameterType="string" resultType="string">
+        select c.id
+        from ccf_register c where c.call_id=#{callId}
+    </select>
+
+    <insert id="insertRegister" parameterType="com.coral.mini.program.rcs.cff.data.consumer.entity.RegisterKafka">
+        insert into ccf_register(id,call_id,path_key_id,client_enum,contact_url,instance_param,nonce_count,pui,pvi,scheme,ue_ip,register_user,auth,first_time,update_time)
+        values(#{id},#{registerBean.callId},#{registerBean.pathKey},#{registerBean.dbClientType},#{registerBean.contactURI},
+        #{registerBean.instanceParam},#{registerBean.nonceCount},#{registerBean.pui},#{registerBean.pvi},
+        #{registerBean.dbScheme},#{registerBean.ueIP},#{registerBean.user},#{registerBean.dbAuthParameters},#{firstTime},#{updateTime})
+    </insert>
+
+    <insert id="insertRegisterDetail" parameterType="com.coral.mini.program.rcs.cff.data.consumer.entity.RegisterKafka">
+         insert into ccf_register_detail(id,call_id,path_key_id,step_type,step_number,response,register_time)
+         values(#{detailId},#{registerBean.callId},#{registerBean.pathKey},#{dbRegType},#{dbRegNumber},#{registerBean.response},#{registerBean.registerTime})
+    </insert>
+
+
+    <select id="queryRegisterEntity" parameterType="SearchVo"
+            resultType="com.coral.mini.program.rcs.cff.data.consumer.entity.RegisterEntity">
+        <include refid="queryRegisterEntity"></include>
+        order by update_time desc
+        limit ${start},${pageSize}
+    </select>
+
+    <select id="getRegisterEntities" parameterType="SearchVo"
+            resultMap="RegisterEntityMap">
+        <include refid="queryRegisterEntity"></include>
+    </select>
+
+    <select id="queryRegisterEntityCount" parameterType="SearchVo"
+            resultType="long">
+        select count(1)
+        from (
+        <include refid="queryRegisterEntity"></include>
+             )as count
+    </select>
+
+    <select id="querySuccessRegisterDetailByCallId" parameterType="string" resultMap="RegisterDetailMap">
+        select * from ccf_register_detail where call_id=#{call_id} and step_number=8
+    </select>
+
+
+    <select id="queryRegisterNoAuthByKey" parameterType="string" resultMap="RegisterDetailMap">
+        select id,call_id,path_key_id,step_type,step_number,response,register_time from ccf_register_detail where path_key_id=#{pathKeyId} and step_number=2
+    </select>
+
+    <select id="queryRegisterLogoutByCallId" parameterType="string" resultMap="RegisterDetailMap">
+        select * from ccf_register_detail where call_id=#{call_id} and step_number=16
+    </select>
+
+
+    <select id="queryOnLineRegister" parameterType="string" resultType="com.coral.mini.program.rcs.cff.data.consumer.entity.DataDeal">
+        SELECT
+        a.days,
+        count(*) countSum
+        FROM
+        (
+        SELECT DISTINCT
+        DATE_FORMAT(c.register_time, '%Y-%m-%d') days,
+        c.call_id
+        FROM
+        ccf_register_detail c
+        WHERE
+        c.step_number = 8
+        <if test="startDate!=null and startDate!=''">
+            and c.register_time>=#{startDate}
+        </if>
+
+        <if test="endDate!=null and endDate!=''">
+            and c.register_time &lt;= #{endDate}
+        </if>
+        AND c.call_id NOT IN (
+        SELECT DISTINCT
+        e.call_id
+        FROM
+        ccf_register_detail e
+        WHERE
+        e.step_number = 16
+        )
+        GROUP BY
+        DATE_FORMAT(c.register_time, '%Y-%m-%d'),
+        c.call_id
+        ) a
+        GROUP BY
+        a.days
+    </select>
+
+    <select id="querySumRegister" parameterType="string" resultType="com.coral.mini.program.rcs.cff.data.consumer.entity.DataDeal">
+        SELECT
+        a.days,
+        count(*) countSum
+        FROM
+        (
+        SELECT
+        DATE_FORMAT(update_time, '%Y-%m-%d') days,
+        pvi
+        FROM
+        ccf_register
+        WHERE
+        nonce_count =- 1
+        <if test="startDate!=null and startDate!=''">
+            and update_time>=#{startDate}
+        </if>
+
+        <if test="endDate!=null and endDate!=''">
+            and update_time &lt;= #{endDate}
+        </if>
+        GROUP BY
+        DATE_FORMAT(update_time, '%Y-%m-%d'),
+        pvi
+        ) a
+        GROUP BY
+        a.days
+
+    </select>
+
+    <select id="queryInsRegister" parameterType="string" resultType="com.coral.mini.program.rcs.cff.data.consumer.entity.DataDeal">
+        select DATE_FORMAT(update_time,'%Y-%m-%d') days,count(*) countSum from ccf_register where
+        first_time=1
+        <if test="startDate!=null and startDate!=''">
+            and update_time>=#{startDate}
+        </if>
+
+        <if test="endDate!=null and endDate!=''">
+            and update_time &lt;= #{endDate}
+        </if>
+        GROUP BY DATE_FORMAT(update_time,'%Y-%m-%d')
+    </select>
+
+    <select id="queryRegisterByPvi" parameterType="string" resultType="int">
+        select count(*) from ccf_register where pvi=#{pvi}
+    </select>
+
+
+
+
+    <sql id="queryRegisterEntity">
+        SELECT DISTINCT
+        r.update_time as updateTime,
+        d.step_number as stepNumber,
+        r.register_user as registerUser
+        FROM
+        ccf_register_detail d
+        LEFT JOIN ccf_register r ON d.call_id = r.call_id
+        WHERE
+        (
+        d.step_number = 8
+        OR d.step_number = 16
+        )
+        <if test="number!=null and number!=''">
+            and (pui like concat('%',${number},'%') or pvi like concat('%',${number},'%'))
+        </if>
+
+        <if test="startDate!=null and startDate!='' and endDate!=null and endDate!=''  ">
+            and (left(r.update_time,10) &gt;= #{startDate} and left(r.update_time,10) &lt;= #{endDate})
+        </if>
+
+    </sql>
+
+</mapper>
+
+

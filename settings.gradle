@@ -1,0 +1,5 @@
+rootProject.name = 'spring-cloud-helium-web-starter'
+include 'helium-web:spring-cloud-helium-web-common'
+include 'helium-web:spring-cloud-helium-web-starter'
+//include 'helium-web:spring-cloud-helium-web-manager-starter'
+include 'helium-web-simple:spring-cloud-helium-web-simple'

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coral.mini.program.rcs.cff.data.consumer.db.mapper.VoSipServletRequestMapper">
+
+    <resultMap id="CallEntityMap" type="com.coral.mini.program.rcs.cff.data.consumer.entity.CallEntity">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="record_type" property="recordType"/>
+        <result column="call_address" property="callAddress"/>
+        <result column="call_mode" property="callMode"/>
+        <result column="call_type" property="callType"/>
+        <result column="as_ip" property="asIp"/>
+        <result column="caller_url" property="callerUrl"/>
+        <result column="called_url" property="calledUrl"/>
+        <result column="sdp" property="sdp"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="CallDetailMap" type="com.coral.mini.program.rcs.cff.data.consumer.entity.CallDetail">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="sip_method" property="sipMethod"/>
+        <result column="call_step" property="callStep"/>
+        <result column="p_asserted_identity" property="pAssertedIdentity"/>
+        <result column="p_charging_vector" property="pChargingVector"/>
+        <result column="p_access_network_info" property="pAccessNetworkInfo"/>
+        <result column="call_id" property="callId"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="call_type" property="callType"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insertCallEntity" parameterType="com.coral.mini.program.rcs.cff.data.consumer.entity.VoSipServletRequest">
+        insert into ccf_call(id,record_type,call_address,call_type,as_ip,caller_url,called_url,sdp,call_mode,update_time,session_id)
+        values(#{id},#{dbRecordType},#{dbCallAddress},#{callType},#{asIp},#{callerUrl},#{calledUrl},#{sdp},#{callMode},#{updateTime},#{sessionId})
+    </insert>
+
+    <insert id="insertCallDetail" parameterType="com.coral.mini.program.rcs.cff.data.consumer.entity.VoSipServletRequest">
+        insert into ccf_call_detail(id,sip_method,call_step,p_asserted_identity, p_charging_vector,p_access_network_info,call_id,update_time,call_type,method_number,session_id)
+        values(#{detailId},#{dbVoType},#{dbVoNumber},#{pAssertedIdentity},#{pChargingVector}, #{pAccessNetworkInfo},#{callId},#{updateTime},#{callType},#{typeNumber},#{sessionId})
+    </insert>
+
+    <select id="queryCallEntityBySessionId" parameterType="string" resultMap="CallEntityMap">
+        select * from ccf_call where session_id=#{session_id}
+    </select>
+
+    <select id="queryCallList" parameterType="SearchVo" resultMap="CallEntityMap">
+        <include refid="queryCallList"/>
+        limit ${start},${pageSize}
+    </select>
+
+    <select id="queryAllCallRecords" parameterType="SearchVo" resultMap="CallEntityMap">
+        <include refid="queryCallList"></include>
+    </select>
+
+    <select id="queryCallListCount" parameterType="SearchVo" resultType="long">
+        select count(*) from ccf_call where 1=1
+        <if test="startDate!=null and startDate!='' and endDate!=null and endDate!=''  ">
+            and (left(update_time,10) &gt;= #{startDate} and left(update_time,10) &lt;= #{endDate})
+        </if>
+        <if test="number!=null and number!=''">
+            and (caller_url like concat('%',${number},'%') or called_url like concat('%',${number},'%'))
+        </if>
+    </select>
+
+    <select id="queryCallDetailList" parameterType="string" resultMap="CallDetailMap">
+        select * from ccf_call_detail where session_id=#{sessionId} ORDER BY update_time
+    </select>
+
+    <select id="queryCallDetailIsConnect" parameterType="string" resultMap="CallDetailMap">
+        select * from ccf_call_detail where session_id=#{sessionId} and call_step=6
+    </select>
+
+    <select id="queryCallDetail" parameterType="string" resultMap="CallDetailMap">
+        select * from ccf_call_detail where session_id=#{sessionId} and (call_step=6 or call_step=8 or call_step=1) ORDER BY update_time
+    </select>
+
+
+    <select id="querySumCall" parameterType="string" resultType="com.coral.mini.program.rcs.cff.data.consumer.entity.DataDeal">
+        SELECT
+            DATE_FORMAT(c.update_time, '%Y-%m-%d') days,COUNT(*) countSum
+        FROM
+            `ccf_call` c
+             where 1=1
+        <if test="startDate!=null and startDate!='' and endDate!=null and endDate!=''  ">
+            and (left(update_time,10) &gt;= #{startDate} and left(update_time,10) &lt;= #{endDate})
+        </if>
+             GROUP BY DATE_FORMAT(c.update_time, '%Y-%m-%d')
+    </select>
+
+    <sql id="queryCallList">
+
+        select *
+        from ccf_call where 1=1
+        <if test="startDate!=null and startDate!='' and endDate!=null and endDate!=''  ">
+            and (left(update_time,10) &gt;= #{startDate} and left(update_time,10) &lt;= #{endDate})
+        </if>
+
+        <if test="number!=null and number!=''">
+            and (caller_url  =  ${number}  or called_url = ${number} )
+        </if>
+        order by update_time desc
+
+    </sql>
+
+</mapper>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coral.mini.program.manager.business.dao.mapper.AppLogMapper">
+
+    <select id="findByTime" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM tap_log
+        WHERE 1=1
+        <if test="startTime != null">
+            AND create_time > #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND #{endTime} > create_time
+        </if>
+    </select>
+</mapper>

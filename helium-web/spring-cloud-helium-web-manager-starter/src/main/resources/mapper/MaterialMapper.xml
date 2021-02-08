@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coral.mini.program.maap.controller.mapper.MaterialMapper">
+
+    <insert id="saveMaterial">
+       insert into maap_chatbot_material( chatbot_id, create_time, type, file_size, url, file_name )
+        values(#{charbotId},now(),#{type},#{fileSize},#{url},#{fileName})
+    </insert>
+
+    <select id="countMaterial" resultType="java.lang.Integer">
+        select count(chatbot_id)
+        from maap_chatbot_material
+        where file_name like #{fileName}
+        and type = #{type}
+    </select>
+
+
+    <select id="queryMaterial" resultType="java.util.Map">
+          select  chatbot_id as chatbotId, create_time as createTime, type, file_size, url, file_name as fileName
+          from maap_chatbot_material
+          where file_name like #{fileName}
+          and type = #{type}
+          limit #{offset},#{pageSize}
+    </select>
+
+
+</mapper>

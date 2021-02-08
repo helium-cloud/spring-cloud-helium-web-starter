@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coral.mini.program.rcs.cff.data.consumer.db.mapper.MessageMapper">
+
+    <resultMap id="MessageEntityMap" type="com.coral.mini.program.rcs.cff.data.consumer.entity.MessageEntity">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="call_id" property="callId"/>
+        <result column="conversation_id" property="conversationId"/>
+        <result column="contribution_id" property="contributionId"/>
+        <result column="message_content_type" property="messageContentType"/>
+        <result column="from_url" property="fromUrl"/>
+        <result column="to_url" property="toUrl"/>
+        <result column="message_mode" property="messageMode"/>
+        <result column="message_address" property="messageAddress"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="MessageDetailMap" type="com.coral.mini.program.rcs.cff.data.consumer.entity.MessageDetail">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="conversation_id" property="conversationId"/>
+        <result column="step_type" property="stepType"/>
+        <result column="step_number" property="stepNumber"/>
+        <result column="status" property="status"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="queryMessageIdByContributionId" parameterType="string" resultType="string">
+        select c.id
+        from ccf_message c where c.conversation_id=#{conversationId}
+    </select>
+
+    <insert id="insertMessage" parameterType="com.coral.mini.program.rcs.cff.data.consumer.entity.MessageKafka">
+        insert into ccf_message(id,call_id,conversation_id,contribution_id,message_content_type,from_url,to_url,update_time)
+        values(#{id},#{convertMessage.callId},#{convertMessage.contributionId},#{convertMessage.conversationId},#{convertMessage.messageContentType},
+        #{convertMessage.from},#{convertMessage.to},#{updateTime})
+    </insert>
+
+    <insert id="insertMessageDetail" parameterType="com.coral.mini.program.rcs.cff.data.consumer.entity.MessageKafka">
+         insert into ccf_message_detail(id,conversation_id,step_type,step_number,status,update_time)
+         values(#{detailId},#{convertMessage.contributionId},#{dbMessageType},#{dbMessageNumber},#{convertMessage.status},#{updateTime})
+    </insert>
+
+
+    <select id="queryMessageList" parameterType="SearchVo" resultMap="MessageEntityMap">
+        <include refid="queryMessageList"/>
+        limit ${start},${pageSize}
+    </select>
+
+    <select id="getMessageEntities" parameterType="SearchVo" resultMap="MessageEntityMap">
+        <include refid="queryMessageList"/>
+    </select>
+
+
+    <select id="queryMessageListCount" parameterType="SearchVo" resultType="long">
+        select count(*) from ccf_message where 1=1
+        <if test="startDate!=null and startDate!='' and endDate!=null and endDate!=''  ">
+            and (left(update_time,10) &gt;= #{startDate} and left(update_time,10) &lt;= #{endDate})
+        </if>
+
+        <if test="number!=null and number!=''">
+            and (from_url like concat('%',${number},'%') or to_url like concat('%',${number},'%'))
+        </if>
+    </select>
+
+    <select id="queryMessageDetailByConversationId" parameterType="string" resultMap="MessageDetailMap">
+        select * from ccf_message_detail where conversation_id=#{conversationId}
+    </select>
+
+    <select id="querySumMessage" parameterType="string" resultType="com.coral.mini.program.rcs.cff.data.consumer.entity.DataDeal">
+        SELECT
+            DATE_FORMAT(c.update_time, '%Y-%m-%d') days,COUNT(*) countSum
+        FROM
+            `ccf_message` c
+                where 1=1
+        <if test="startDate!=null and startDate!='' and endDate!=null and endDate!=''  ">
+            and (left(update_time,10) &gt;= #{startDate} and left(update_time,10) &lt;= #{endDate})
+        </if>
+             GROUP BY DATE_FORMAT(c.update_time, '%Y-%m-%d')
+    </select>
+
+    <sql id="queryMessageList">
+        select * from ccf_message where 1=1
+        <if test="startDate!=null and startDate!='' and endDate!=null and endDate!=''  ">
+            and (left(update_time,10) &gt;= #{startDate} and left(update_time,10) &lt;= #{endDate})
+        </if>
+        <if test="number!=null and number!=''">
+            and (from_url like concat('%',${number},'%') or to_url like concat('%',${number},'%'))
+        </if>
+        order by update_time desc
+    </sql>
+</mapper>

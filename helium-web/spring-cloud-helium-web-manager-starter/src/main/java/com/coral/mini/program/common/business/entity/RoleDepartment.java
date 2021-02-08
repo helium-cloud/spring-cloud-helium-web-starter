@@ -1,0 +1,54 @@
+package com.coral.mini.program.common.business.entity;
+
+import com.baomidou.mybatisplus.annotations.TableName;
+import com.coral.mini.program.common.business.BaseEntity;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
+
+/**
+ * @author coral
+ */
+
+@Entity
+@Table( name = "t_role_department",
+        indexes = {
+            @Index(columnList = "roleId"),
+            @Index(columnList = "departmentId")
+        }
+)
+@TableName("t_role_department")
+@ApiModel(value = "角色部门")
+public class RoleDepartment extends BaseEntity {
+
+    private static final long serialVersionUID = 1L;
+
+    @ApiModelProperty(value = "角色id")
+    @Column(length = 64)
+    private String roleId;
+
+    @ApiModelProperty(value = "部门id")
+    @Column(length = 64)
+    private String departmentId;
+
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
+
+    public String getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(String departmentId) {
+        this.departmentId = departmentId;
+    }
+}

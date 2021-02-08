@@ -1,0 +1,204 @@
+{
+  "roles": [
+    {
+      "name": "ROLE_ADMIN",
+      "description": "超级管理员,拥有所有权限",
+      "permissions": [
+        {
+          "title": "小程序管理"
+        },
+        {
+          "title": "应用管理"
+        },
+        {
+          "title": "小程序使用统计"
+        },
+        {
+          "title": "类别管理"
+        },
+        {
+          "title": "开发者管理"
+        },
+        {
+          "title": "系统管理"
+        },
+        {
+          "title": "用户管理"
+        },
+        {
+          "title": "部门管理"
+        },
+        {
+          "title": "角色权限管理"
+        },
+        {
+          "title": "菜单权限管理"
+        },
+        {
+          "title": "数据字典管理"
+        }
+
+      ],
+      "departments": [
+        {
+          "title": "总部"
+        }
+      ]
+    },
+    {
+      "name": "ROLE_USER",
+      "description": "普通注册用户,路过看看",
+      "permissions": [
+        {
+          "title": "用户管理"
+        }
+      ],
+      "departments": [
+        {
+          "title": "技术部"
+        }
+      ]
+    }
+  ],
+  "departments": [
+    {
+      "title": "总部",
+      "sortOrder": 1.00,
+      "children": [
+        {
+          "title": "技术部",
+          "sortOrder": 2.00,
+          "children": []
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "name": "appmanager",
+      "level": 1,
+      "title": "小程序管理",
+      "path": "/appmanager",
+      "component": "Main",
+      "icon": "ios-apps",
+      "sortOrder": 0.00,
+      "children": [
+        {
+          "name": "appinfo_list",
+          "level": 2,
+          "title": "应用管理",
+          "path": "app-manage/appinfo/list",
+          "component": "app-manage/appinfo/list",
+          "icon": "ios-apps",
+          "sortOrder": 2.00,
+          "children": []
+        },
+        {
+          "name": "appmanager_countuse",
+          "level": 2,
+          "title": "小程序使用统计",
+          "path": "/appmanager/countuse",
+          "component": "app-manage/appstatis/appaccess",
+          "icon": "ios-globe",
+          "sortOrder": 6.00,
+          "children": []
+        },
+        {
+          "name": "app-manage_arrange_list",
+          "level": 2,
+          "title": "类别管理",
+          "path": "app-manage/arrange/list",
+          "component": "app-manage/arrange/list",
+          "icon": "md-apps",
+          "sortOrder": 3.00,
+          "children": []
+        },
+        {
+          "name": "app-manage_developer_list",
+          "level": 2,
+          "title": "开发者管理",
+          "path": "app-manage/developer/list",
+          "component": "app-manage/developer/list",
+          "icon": "md-cloud",
+          "sortOrder": 7.00,
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "sys",
+      "level": 1,
+      "title": "系统管理",
+      "path": "/sys",
+      "component": "Main",
+      "icon": "ios-settings",
+      "sortOrder": 10.00,
+      "children": [
+        {
+          "name": "user-manage",
+          "level": 2,
+          "title": "用户管理",
+          "path": "user-manage",
+          "component": "sys/user-manage/userManage",
+          "icon": "md-person",
+          "sortOrder": 1.10,
+          "children": []
+        },
+        {
+          "name": "department-manage",
+          "level": 2,
+          "title": "部门管理",
+          "path": "department-manage",
+          "component": "sys/department-manage/departmentManage",
+          "icon": "md-git-branch",
+          "sortOrder": 1.20,
+          "children": []
+        },
+        {
+          "name": "role-manage",
+          "level": 2,
+          "title": "角色权限管理",
+          "path": "role-manage",
+          "component": "sys/role-manage/roleManage",
+          "icon": "md-contacts",
+          "sortOrder": 1.30,
+          "children": []
+        },
+        {
+          "name": "menu-manage",
+          "level": 2,
+          "title": "菜单权限管理",
+          "path": "menu-manage",
+          "component": "sys/menu-manage/menuManage",
+          "icon": "md-menu",
+          "sortOrder": 1.40,
+          "children": []
+        },
+        {
+          "name": "dict",
+          "level": 2,
+          "title": "数据字典管理",
+          "path": "dict",
+          "component": "sys/dict-manage/dictManage",
+          "icon": "md-bookmarks",
+          "sortOrder": 1.50,
+          "children": []
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "password": "123456",
+      "department": "总部",
+      "role": "ROLE_ADMIN"
+    },
+    {
+      "username": "user",
+      "password": "123456",
+      "department": "总部",
+      "role": "ROLE_USER"
+    }
+  ]
+}

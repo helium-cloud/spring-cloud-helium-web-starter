@@ -1,0 +1,3 @@
+dependencies {
+    compile project(':helium-web:spring-cloud-helium-web-starter')
+}

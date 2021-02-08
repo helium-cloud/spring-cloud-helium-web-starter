@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.coral.mini.program.rcs.maap.mapper.ChatbotMapper">
+
+    <resultMap id="ChatbotEntityMap" type="com.coral.mini.program.rcs.maap.entity.ChatbotEntity">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="access_number" property="accessNumber"/>
+        <result column="service_code" property="serviceCode"/>
+        <result column="chatbot_name" property="chatbotName"/>
+        <result column="icon" property="icon"/>
+        <result column="verified" property="verified"/>
+        <result column="description" property="description"/>
+        <result column="sms" property="sms"/>
+        <result column="autograph" property="autograph"/>
+        <result column="provider" property="provider"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="category" property="category"/>
+        <result column="date_time" property="dateTime"/>
+    </resultMap>
+
+
+    <!--与获取服务代码相关-->
+    <resultMap id="ServiceCodeEntityMap" type="com.coral.mini.program.rcs.maap.entity.ServiceCodeEntity">
+        <id column="service_code" property="serviceCode"/>
+        <result column="service_detail" property="serviceDetail"/>
+    </resultMap>
+
+
+    <!--与行业类型相关,进行对象和关系映射-->
+    <resultMap id="BusinessTypeEntityMap" type="com.coral.mini.program.rcs.maap.entity.MenuEntity">
+        <id column="category_id" property="categoryId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="category_describe" property="name"/>
+    </resultMap>
+
+    <!--根据chatBotId删除 chatBot -->
+    <delete id="deleteChatBot">
+        delete from maap_chatbot
+        where id = #{chatBotId}
+    </delete>
+
+
+    <select id="queryChatbotList" parameterType="com.coral.mini.program.common.common.vo.ChatbotSearchVo"
+            resultMap="ChatbotEntityMap">
+        select *
+        from maap_chatbot
+        where 1=1
+        <if test=" selectCondition !=null and selectCondition != '' ">
+        and    (chatbot_name like  concat('%', ${selectCondition}, '%')  or  id  like  concat('%', ${selectCondition}, '%') )
+        </if>
+        limit ${start},${pageSize}
+    </select>
+
+
+    <select id="queryChatbotCount" resultType="java.lang.Long">
+        select count(1)
+        from maap_chatbot
+        where 1=1
+        <if test=" selectCondition !=null and selectCondition != '' ">
+            and    (chatbot_name like  concat('%', ${selectCondition}, '%')  or  id  like  concat('%', ${selectCondition}, '%') )
+        </if>
+
+    </select>
+
+
+    <insert id="addChatbot" parameterType="com.coral.mini.program.rcs.maap.entity.ChatbotEntity">
+        insert into maap_chatbot(id, access_number, service_code, chatbot_name, icon, verified, description, sms,
+                                 autograph, provider, customer_id, category, date_time)
+        values (#{id}, #{accessNumber}, #{serviceCode}, #{chatbotName}, #{icon}, #{verified}, #{description}, #{sms},
+                #{autograph}, #{provider}, #{customerId}, #{category}, #{dateTime})
+    </insert>
+
+
+    <!--获取服务代码及其描述信息-->
+    <select id="getServiceCode" resultMap="ServiceCodeEntityMap">
+        select service_code , service_detail
+        from maap_chatbot_service_detail
+
+    </select>
+
+
+    <select id="getBusinessType" resultMap="BusinessTypeEntityMap">
+        select category_id, parent_id, category_describe
+        from maap_chatbot_category
+    </select>
+
+
+</mapper>

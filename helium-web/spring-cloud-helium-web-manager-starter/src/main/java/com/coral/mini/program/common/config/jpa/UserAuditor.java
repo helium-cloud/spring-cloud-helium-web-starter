@@ -1,0 +1,30 @@
+package com.coral.mini.program.common.config.jpa;
+
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Optional;
+
+/**
+ * 审计记录创建或修改用户
+ * @author coral
+ */
+@Configuration
+
+public class UserAuditor implements AuditorAware<String> {
+
+    @Override
+    public Optional<String> getCurrentAuditor() {
+
+        UserDetails user;
+        try {
+            user = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return Optional.ofNullable(user.getUsername());
+        }catch (Exception e){
+            return Optional.empty();
+        }
+    }
+}
