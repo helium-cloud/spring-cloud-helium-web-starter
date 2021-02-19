@@ -54,16 +54,18 @@ public abstract class BaseController<E, ID extends Serializable> {
     @RequestMapping(value = "/save",method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "保存数据")
-    public Result<E> save(@ModelAttribute E entity){
+    public Result<E> save(@RequestBody E entity){
 
         E e = getService().save(entity);
         return new ResultUtil<E>().setData(e);
     }
 
+
+
     @RequestMapping(value = "/update",method = RequestMethod.PUT)
     @ResponseBody
     @ApiOperation(value = "更新数据")
-    public Result<E> update(@ModelAttribute E entity){
+    public Result<E> update(@RequestBody E entity){
 
         E e = getService().update(entity);
         return new ResultUtil<E>().setData(e);
